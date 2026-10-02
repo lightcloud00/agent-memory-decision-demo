@@ -1,0 +1,126 @@
+{
+  "data": "synthetic",
+  "mode": "fixture",
+  "execution_authority": "none",
+  "retrieval": {
+    "project": "cedar",
+    "hits": [
+      {
+        "source_id": "support-policy",
+        "text": "Support incidents with customer data loss require escalation and human review.",
+        "sha256": "e49dba4c9be33dcefe1e7568701f2db7fd0b11ae012b5137975585fc967dd025",
+        "route": "verified_candidate"
+      },
+      {
+        "source_id": "incident-runbook",
+        "text": "Current incident runbook: record support severity, verify evidence, and escalate unresolved failures.",
+        "sha256": "2d78ae46dbc5548d17ec8172eae00186d0e054c7ffc799cc8e0bdb8628a3b4eb",
+        "route": "lexical_fallback"
+      }
+    ],
+    "rejected": [
+      {
+        "source_id": "incident-runbook",
+        "reason": "stale_hash"
+      },
+      {
+        "source_id": "support-policy",
+        "reason": "wrong_project"
+      }
+    ],
+    "requires_review": false
+  },
+  "decisions": [
+    {
+      "probability_true": 0.93,
+      "mode": "fixture",
+      "route": "propose_allow",
+      "execution_authority": "none"
+    },
+    {
+      "probability_true": 0.5,
+      "mode": "fixture",
+      "route": "review",
+      "execution_authority": "none"
+    },
+    {
+      "probability_true": 0.07,
+      "mode": "fixture",
+      "route": "propose_deny",
+      "execution_authority": "none"
+    }
+  ],
+  "memory": {
+    "first": {
+      "created": true,
+      "status": "processed",
+      "project": "cedar",
+      "key": "support-policy:v2"
+    },
+    "duplicate": {
+      "created": false,
+      "status": "processed",
+      "project": "cedar",
+      "key": "support-policy:v2"
+    },
+    "readback": {
+      "payload": {
+        "source_id": "support-policy",
+        "summary": "Synthetic Cedar support escalation policy"
+      },
+      "marker": "DEMO-CEDAR-001",
+      "status": "processed"
+    },
+    "recall": [
+      {
+        "key": "support-policy:v2",
+        "payload": {
+          "source_id": "support-policy",
+          "summary": "Synthetic Cedar support escalation policy"
+        }
+      }
+    ]
+  },
+  "contracts": [
+    {
+      "case": "current_source_verified",
+      "passed": true
+    },
+    {
+      "case": "stale_index_rejected",
+      "passed": true
+    },
+    {
+      "case": "fresh_lexical_fallback",
+      "passed": true
+    },
+    {
+      "case": "cross_project_rejected",
+      "passed": true
+    },
+    {
+      "case": "uncertain_decision_reviews",
+      "passed": true
+    },
+    {
+      "case": "fixtures_cannot_execute",
+      "passed": true
+    },
+    {
+      "case": "duplicate_write_is_idempotent",
+      "passed": true
+    },
+    {
+      "case": "processed_readback_exact_recall",
+      "passed": true
+    }
+  ],
+  "passed": 8,
+  "total": 8,
+  "live_advisory": {
+    "attempted": false,
+    "mode": "fixture"
+  },
+  "elapsed_ms": 3.391,
+  "measurement_scope": "one local fixture run; not model accuracy or production latency"
+}
