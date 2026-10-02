@@ -1,0 +1,37 @@
+{
+  "data": "synthetic",
+  "sources": [
+    {
+      "project": "cedar",
+      "source_id": "support-policy",
+      "text": "Support incidents with customer data loss require escalation and human review."
+    },
+    {
+      "project": "cedar",
+      "source_id": "incident-runbook",
+      "text": "Current incident runbook: record support severity, verify evidence, and escalate unresolved failures."
+    },
+    {
+      "project": "maple",
+      "source_id": "support-policy",
+      "text": "Synthetic Maple account policy; never disclose across project boundaries."
+    }
+  ],
+  "candidates": [
+    {
+      "project": "cedar",
+      "source_id": "support-policy",
+      "indexed_sha256": "e49dba4c9be33dcefe1e7568701f2db7fd0b11ae012b5137975585fc967dd025"
+    },
+    {
+      "project": "cedar",
+      "source_id": "incident-runbook",
+      "indexed_sha256": "9b4367ed7e8969510e6747486938f95e7b21bcd2620797a29ddfa6dab46cb81a"
+    },
+    {
+      "project": "maple",
+      "source_id": "support-policy",
+      "indexed_sha256": "7a66a58cc82589d4b23514dce4b360cc04ff55f5334980f18fe410763d50b997"
+    }
+  ]
+}
