@@ -54,6 +54,9 @@ def retrieve(
     This is a candidate-validation contract, not an implementation of vector search.
     Only the requested project's current text can appear in a returned hit.
     """
+    if (not isinstance(project, str) or not isinstance(query, str)
+            or isinstance(limit, bool) or not isinstance(limit, int)):
+        raise ValueError("project and query must be strings and limit an integer")
     if not project.strip() or not query.strip() or limit < 1:
         raise ValueError("project, query, and a positive limit are required")
     current: dict[tuple[str, str], Source] = {}
@@ -96,9 +99,9 @@ def retrieve(
 def decision(probability_true: float, mode: str, evidence_available: bool) -> dict[str, Any]:
     """Return a proposed boolean route, never permission to execute a tool."""
     if (isinstance(probability_true, bool) or not isinstance(probability_true, (int, float))
-            or not math.isfinite(probability_true) or not 0 <= probability_true <= 1):
+            or not 0 <= probability_true <= 1 or not math.isfinite(probability_true)):
         raise ValueError("probability must be a finite number between zero and one")
-    if mode not in {"fixture", "live"}:
+    if not isinstance(mode, str) or mode not in {"fixture", "live"}:
         raise ValueError("explicit fixture or live mode required")
     route = "review"
     if evidence_available:
@@ -142,7 +145,7 @@ def jev_advisory(question: str, cli: str = "jev", timeout: float = 15.0) -> dict
     except ProviderUnavailable:
         raise
     except (OSError, subprocess.TimeoutExpired, json.JSONDecodeError,
-            KeyError, TypeError, ValueError, AttributeError) as exc:
+            KeyError, TypeError, ValueError, OverflowError, AttributeError) as exc:
         raise ProviderUnavailable("Jev unavailable or response contract invalid") from exc
 
 
@@ -176,11 +179,15 @@ class MemoryStore:
             connection.close()
 
     def retain(self, project: str, key: str, payload: dict[str, Any], marker: str) -> dict[str, Any]:
+        if not all(isinstance(v, str) for v in (project, key, marker)):
+            raise ValueError("project, idempotency key, and marker must be strings")
         if not project.strip() or not key.strip() or not marker.strip():
             raise ValueError("project, idempotency key, and exact marker are required")
         if not isinstance(payload, dict):
             raise ValueError("payload must be an object")
         serialized = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False)
+        if json.loads(serialized) != payload:
+            raise ValueError("payload must round-trip through JSON unchanged")
         with self._connect() as connection:
             # Serializes competing writes; uniqueness remains enforced by the database.
             connection.execute("BEGIN IMMEDIATE")
@@ -215,7 +222,7 @@ class MemoryStore:
 
 def run_demo(output: Path, live_question: str | None = None) -> dict[str, Any]:
     start = time.perf_counter()
-    fixture = json.loads((Path(__file__).parent / "fixtures" / "sources.json").read_text())
+    fixture = json.loads((Path(__file__).parent / "fixtures" / "sources.json").read_text(encoding="utf-8"))
     sources = [Source(**source) for source in fixture["sources"]]
     candidates = [Candidate(**candidate) for candidate in fixture["candidates"]]
     retrieval = retrieve("cedar", "support incident escalation", sources, candidates)
@@ -253,7 +260,7 @@ def run_demo(output: Path, live_question: str | None = None) -> dict[str, Any]:
               "live_advisory": live, "elapsed_ms": round((time.perf_counter() - start) * 1000, 3),
               "measurement_scope": "one local fixture run; not model accuracy or production latency"}
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(report, indent=2) + "\n")
+    output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     return report
 
 
