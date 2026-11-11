@@ -104,6 +104,12 @@ standard AWS credential chain, and the code never reads, prints or stores a key.
 The live test is opt-in (`AMD_LIVE_BEDROCK=1` plus `BEDROCK_MODEL_ID`) and has not been
 run yet. Any live call can cost money.
 
+## Hands-on workshop
+
+[WORKSHOP.md](WORKSHOP.md) is a 40-minute, offline walkthrough of the four contracts.
+Each step has runnable snippets, a break-it-on-purpose exercise and the exact output to
+expect. The optional Bedrock step uses a fake client, so it needs no AWS account.
+
 ## Interview walkthrough
 
 Show the stale-hash rejection and recovered runbook first. Change a canonical
