@@ -90,6 +90,20 @@ the contracts; the synthetic demo keeps the checks reproducible without private
 notes, production infrastructure, or a model account. Lexical token overlap is
 simple and explainable, but is not an embedding retrieval quality benchmark.
 
+## Optional Amazon Bedrock adapter (not yet run live)
+
+`bedrock_advisory.py` mirrors the other advisory adapters. It sends one question to a
+Bedrock model, forces the `record_decision` tool, and returns the same review-only dict.
+The model has to answer with that tool call. Any other reply, a missing field or a
+provider error becomes `ProviderUnavailable`, and no result ever grants execution
+authority.
+
+Boto3 is needed only for live runs: `pip install boto3`. Credentials come from the
+standard AWS credential chain, and the code never reads, prints or stores a key.
+
+The live test is opt-in (`AMD_LIVE_BEDROCK=1` plus `BEDROCK_MODEL_ID`) and has not been
+run yet. Any live call can cost money.
+
 ## Interview walkthrough
 
 Show the stale-hash rejection and recovered runbook first. Change a canonical
