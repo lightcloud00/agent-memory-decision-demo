@@ -54,6 +54,12 @@ class RetrievalTests(unittest.TestCase):
                 retrieve(project, query, self.sources, [], limit)
 
 
+    def test_wrong_argument_types_are_value_errors(self):
+        for args in [(None, "support", 1), ("cedar", 42, 1), ("cedar", "support", 2.5), ("cedar", "support", True)]:
+            with self.subTest(args=args), self.assertRaises(ValueError):
+                retrieve(args[0], args[1], self.sources, [], args[2])
+
+
 class DecisionTests(unittest.TestCase):
     def test_confidence_boundaries(self):
         expected = [(0.2, "propose_deny"), (0.2001, "review"), (0.7999, "review"), (0.8, "propose_allow")]
@@ -70,6 +76,12 @@ class DecisionTests(unittest.TestCase):
                 decision(probability, "fixture", True)
         with self.assertRaises(ValueError):
             decision(0.9, "mock", True)
+
+    def test_huge_integer_and_non_string_mode_are_value_errors(self):
+        with self.assertRaises(ValueError):
+            decision(10 ** 400, "fixture", True)
+        with self.assertRaises(ValueError):
+            decision(0.5, ["live"], True)
 
     def test_fixture_never_grants_execution(self):
         self.assertEqual(decision(1.0, "fixture", True)["execution_authority"], "none")
@@ -118,6 +130,12 @@ class ProviderTests(unittest.TestCase):
                 jev_advisory("test")
 
 
+    def test_huge_provider_probability_fails_closed(self):
+        data = self.valid()
+        data["decisions"]["decision"]["probabilityTrue"] = 10 ** 400
+        with patch("agent_memory_demo.subprocess.run", return_value=self.response(data)), self.assertRaises(ProviderUnavailable):
+            jev_advisory("test")
+
 class MemoryTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
@@ -156,6 +174,13 @@ class MemoryTests(unittest.TestCase):
                 self.store.retain("cedar", "key", payload, "MARKER")
         self.assertIsNone(self.store.readback("cedar", "key"))
 
+
+    def test_payload_must_round_trip_exactly(self):
+        for index, payload in enumerate([{"tags": ("a", "b")}, {1: "a"}]):
+            with self.subTest(payload=payload):
+                with self.assertRaises(ValueError):
+                    self.store.retain("cedar", f"lossy-{index}", payload, "MARKER")
+                self.assertIsNone(self.store.readback("cedar", f"lossy-{index}"))
 
 class DemoTests(unittest.TestCase):
     def test_fixture_contracts_and_optional_provider_failure(self):
